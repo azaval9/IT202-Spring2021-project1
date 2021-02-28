@@ -35,6 +35,9 @@
             .screen {
                 display: none;
             }
+            .row {
+                display: block;
+            }
         </style>
     </head>
 
@@ -74,9 +77,9 @@
             </div>
         </nav>
 
-        <div class="content">
+        <div class="container">
             <!-- class screen is used to hide and display the item -->
-            <div class="screen" id="home">
+            <div class="screen" style="display: block" id="home">
                 <div class="h1">Home</div>
                 <p class="text-left">
                     This app lets you search the City of Chicago City-Owned Land
@@ -98,15 +101,54 @@
             </div>
             <div class="screen" id="form">
                 <div class="h1">Form</div>
+                <!-- should have more options than ward number -->
+                <form class="form" id="form">
+                    <div class="form-group">
+                        <label for="number">Ward Number</label>
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="inputWardNumber"
+                            placeholder="Enter the ward number"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        id="btnSubmit"
+                        class="btn btn-default btn-dark"
+                    >
+                        Submit
+                    </button>
+                </form>
             </div>
             <div class="screen" id="data">
                 <div class="h1">Data</div>
+                <div class="row">
+                    <div class="card" style="display: none">
+                        <div class="card-body">
+                            <h5 class="card-title">Card title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                Card subtitle
+                            </h6>
+                            <p class="card-text">
+                                Some quick example text to build on the card
+                                title and make up the bulk of the card's
+                                content.
+                            </p>
+                            <!-- <a href="#" class="card-link">Card link</a> -->
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="screen" id="map">
                 <div class="h1">Map</div>
             </div>
             <div class="screen" id="about">
                 <div class="h1">About</div>
+                <p>
+                    This is an single web application for the course IT202, at
+                    the University of Illinois at Chicago, by Adrian Zavala.
+                </p>
             </div>
         </div>
 
@@ -130,6 +172,62 @@
                     //show display
                     targetScreen.style.display = "block";
                 });
+            });
+
+            //add event handler to the submit button
+            let submitButton = document.querySelector("#btnSubmit");
+            submitButton.addEventListener("click", (event) => {
+                let wardNumber = document.querySelector("#inputWardNumber")
+                    .value;
+
+                document.querySelectorAll("#cloneCard").forEach((card) => {
+                    document.querySelector(".row").removeChild(card);
+                });
+
+                //let asd = document.querySelector("#cloneCard");
+
+                //fetch data with the appropriate values
+                let dataString =
+                    "https://data.cityofchicago.org/resource/aksk-kvfp.json";
+                dataString = dataString + "?" + "ward=" + wardNumber;
+                //add more variables using the '&' symbol
+
+                fetch(dataString)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((json) => {
+                        //store information
+                        for (let row of json) {
+                            //create the cards and add them to the data page
+                            let tempCard = document.querySelector(
+                                "div.row .card"
+                            );
+                            let cloneCard = tempCard.cloneNode(true);
+                            cloneCard.style.display = "block";
+                            cloneCard.id = "cloneCard";
+                            cloneCard.querySelector("h5.card-title").innerHTML =
+                                row["community_area_name"] ??
+                                "N/A" + " - " + row["pin"] ??
+                                "N/A";
+                            cloneCard.querySelector(
+                                "h6.card-subtitle.mb-2.text-muted"
+                            ).innerHTML =
+                                row["address"] ??
+                                "N/A" + " - " + row["sq_ft"] ??
+                                "N/A";
+                            cloneCard.querySelector("p.card-text").innerHTML =
+                                row["pin"] ?? "N/A";
+                            // cloneCard.querySelector("a.card-link").innerHTML =
+                            //     row["website"]["url"];
+                            tempCard.after(cloneCard);
+                        }
+                    });
+
+                //clear the map markers
+
+                // clear the input field
+                document.querySelector("#inputWardNumber").value = "";
             });
         </script>
 
