@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>App Shell</title>
-        <link rel="manifest" href="/manifest.json" />
+        <!-- <link rel="manifest" href="/manifest.json" /> -->
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <!-- <link rel="stylesheet" type="text/css" href="styles/inline.css" /> -->
@@ -31,12 +31,35 @@
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"
         ></script>
+        <script>
+            let map;
+
+            function initMap() {
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 41.8696, lng: -87.6496 },
+                    zoom: 12,
+                });
+            }
+        </script>
+        <script
+            async
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAU4UQW0mfxEBjkCQ9rTvY4Mw6g2Mjw4pg&callback=initMap"
+        ></script>
         <style>
             .screen {
                 display: none;
             }
             .row {
                 display: block;
+            }
+            #googleMap {
+                height: 100%;
+            }
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
             }
         </style>
     </head>
@@ -77,7 +100,7 @@
             </div>
         </nav>
 
-        <div class="container">
+        <div class="container" style="height: 100%; width: 100%">
             <!-- class screen is used to hide and display the item -->
             <div class="screen" style="display: block" id="home">
                 <div class="h1">Home</div>
@@ -135,13 +158,12 @@
                                 title and make up the bulk of the card's
                                 content.
                             </p>
-                            <!-- <a href="#" class="card-link">Card link</a> -->
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="screen" id="map">
-                <div class="h1">Map</div>
+            <div class="screen" id="map" style="height: 100%; width: 100%">
+                <div class="h1" id="googleMap">Map</div>
             </div>
             <div class="screen" id="about">
                 <div class="h1">About</div>
@@ -154,7 +176,7 @@
 
         <script>
             let navAnchors = document.querySelectorAll("a.nav-link");
-
+            //console.log("hello");
             //add a click event listener to each nav link
             navAnchors.forEach((anchor) => {
                 anchor.addEventListener("click", (event) => {
@@ -177,14 +199,16 @@
             //add event handler to the submit button
             let submitButton = document.querySelector("#btnSubmit");
             submitButton.addEventListener("click", (event) => {
-                let wardNumber = document.querySelector("#inputWardNumber")
-                    .value;
+                //clear the map markers
 
+                //clear any data cards
                 document.querySelectorAll("#cloneCard").forEach((card) => {
                     document.querySelector(".row").removeChild(card);
                 });
 
-                //let asd = document.querySelector("#cloneCard");
+                //get input for query string
+                let wardNumber = document.querySelector("#inputWardNumber")
+                    .value;
 
                 //fetch data with the appropriate values
                 let dataString =
@@ -221,39 +245,28 @@
                             // cloneCard.querySelector("a.card-link").innerHTML =
                             //     row["website"]["url"];
                             tempCard.after(cloneCard);
+
+                            //add google markers for the cards
+                            let myLat = parseFloat(row["latitude"]);
+                            let myLng = parseFloat(row["longitude"]);
+                            //let myLatlng = new google.maps.LatLng(myLat, myLng);
+                            let myMap = document.querySelector("#googleMap");
+
+                            let marker = new google.maps.Marker({
+                                position: { lat: myLat, lng: myLng },
+                                map: myMap
+                            });
+
+                            // let infowindow = new google.maps.InfoWindow({
+                            //     content: "Chicago",
+                            // });
                         }
                     });
 
-                //clear the map markers
-
                 // clear the input field
                 document.querySelector("#inputWardNumber").value = "";
+                event.preventDefault();
             });
         </script>
-
-        <!-- <div class="dialog-container">...</div>
-
-        <div class="loader">
-             Show a spinner or placeholders for content 
-        </div>
-
-         <script src="app.js" async></script> 
-        <script>
-            if ("serviceWorker" in navigator) {
-                navigator.serviceWorker
-                    .register("/sw.js")
-                    .then(function (registration) {
-                        // Registration was successful
-                        console.log(
-                            "ServiceWorker registration successful with scope: ",
-                            registration.scope
-                        );
-                    })
-                    .catch(function (err) {
-                        // registration failed :(
-                        console.log("ServiceWorker registration failed: ", err);
-                    });
-            }
-        </script> -->
     </body>
 </html>
