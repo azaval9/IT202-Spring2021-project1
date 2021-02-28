@@ -33,7 +33,7 @@
         ></script>
         <script>
             var map;
-
+            var markers = [];
             function initMap() {
                 map = new google.maps.Map(document.getElementById("map"), {
                     center: { lat: 41.8781, lng: -87.6298 },
@@ -124,8 +124,27 @@
             </div>
             <div class="screen" id="form">
                 <div class="h1">Form</div>
+                <div class="h4">Please enter one field per search.</div>
                 <!-- should have more options than ward number -->
                 <form class="form" id="form">
+                    <div class="form-group">
+                        <label for="String">Address</label>
+                        <input
+                            type="string"
+                            class="form-control"
+                            id="inputAddress"
+                            placeholder="Enter the address. Ex: 1744 N MOZART ST"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="String">Community Area</label>
+                        <input
+                            type="string"
+                            class="form-control"
+                            id="inputCommunityArea"
+                            placeholder="Enter the community area name"
+                        />
+                    </div>
                     <div class="form-group">
                         <label for="number">Ward Number</label>
                         <input
@@ -200,6 +219,10 @@
             let submitButton = document.querySelector("#btnSubmit");
             submitButton.addEventListener("click", (event) => {
                 //clear the map markers
+                for (let i = 0; i < markers.length; i++) {
+                    markers[i].setMap(null);
+                }
+                markers = [];
 
                 //clear any data cards
                 document.querySelectorAll("#cloneCard").forEach((card) => {
@@ -207,13 +230,29 @@
                 });
 
                 //get input for query string
+                let addy = document.querySelector("#inputAddress").value;
+                let commArea = document.querySelector("#inputCommunityArea")
+                    .value;
                 let wardNumber = document.querySelector("#inputWardNumber")
                     .value;
 
                 //fetch data with the appropriate values
                 let dataString =
-                    "https://data.cityofchicago.org/resource/aksk-kvfp.json";
-                dataString = dataString + "?" + "ward=" + wardNumber;
+                    "https://data.cityofchicago.org/resource/aksk-kvfp.json?";
+                if (addy != "") {
+                    dataString = dataString + "address=" + addy.toUpperCase();
+                }
+                if (commArea != "") {
+                    dataString =
+                        dataString +
+                        "community_area_name=" +
+                        commArea.toUpperCase();
+                }
+                if (wardNumber != "") {
+                    dataString = dataString + "ward=" + wardNumber;
+                }
+
+                //dataString = dataString + "?" + "ward=" + wardNumber;
                 //add more variables using the '&' symbol
 
                 fetch(dataString)
@@ -231,15 +270,15 @@
                             cloneCard.style.display = "block";
                             cloneCard.id = "cloneCard";
                             cloneCard.querySelector("h5.card-title").innerHTML =
-                                row["community_area_name"] ??
-                                "N/A" + " - " + row["pin"] ??
-                                "N/A";
+                                (row["community_area_name"] ?? "N/A") +
+                                " - " +
+                                (row["pin"] ?? "N/A");
                             cloneCard.querySelector(
                                 "h6.card-subtitle.mb-2.text-muted"
                             ).innerHTML =
-                                row["address"] ??
-                                "N/A" + " - " + row["sq_ft"] ??
-                                "N/A";
+                                (row["address"] ?? "N/A") +
+                                " - " +
+                                (row["sq_ft"] ?? "N/A");
                             cloneCard.querySelector("p.card-text").innerHTML =
                                 row["pin"] ?? "N/A";
                             // cloneCard.querySelector("a.card-link").innerHTML =
@@ -250,27 +289,28 @@
                             let myLat = parseFloat(row["latitude"]);
                             let myLng = parseFloat(row["longitude"]);
 
+                            //create a marker and push into the markers array
                             let marker = new google.maps.Marker({
                                 position: { lat: myLat, lng: myLng },
                                 map,
                             });
-                            let line1 = row["community_area_name"] ?? "N/A";
+                            markers.push(marker);
+
+                            //create content message
+                            let line1 =
+                                (row["community_area_name"] ?? "N/A") + " ";
                             let line2 =
-                                row["address"] ??
-                                "N/A" + " - " + row["sq_ft"] ??
-                                "N/A";
+                                (row["address"] ?? "N/A") +
+                                " - " +
+                                (row["sq_ft"] ?? "N/A") +
+                                " ";
                             let line3 = row["pin"] ?? "N/A";
                             const contentString = `<h4>${line1}</h4>
                                 <p>${line2}</p>
                                 <p>${line3}</p>`;
+
                             let infowindow = new google.maps.InfoWindow({
                                 content: contentString,
-                                // row["community_area_name"] ??
-                                // "N/A" + " - " + row["pin"] ??
-                                // "N/A" + " " + row["address"] ??
-                                // "N/A" + " - " + row["sq_ft"] ??
-                                // "N/A" + " " + row["pin"] ??
-                                // "N/A",
                             });
 
                             marker.addListener("click", () => {
@@ -281,6 +321,8 @@
 
                 // clear the input field
                 document.querySelector("#inputWardNumber").value = "";
+                document.querySelector("#inputCommunityArea").value = "";
+                document.querySelector("#inputAddress").value = "";
                 event.preventDefault();
             });
         </script>
