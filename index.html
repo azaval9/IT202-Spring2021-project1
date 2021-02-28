@@ -36,14 +36,8 @@
 
             function initMap() {
                 map = new google.maps.Map(document.getElementById("map"), {
-                    center: { lat: 41.8696, lng: -87.6496 },
-                    zoom: 12,
-                });
-
-                let marker = new google.maps.Marker({
-                    position: { lat: 41.8696, lng: -87.6496 },
-                    map,
-                    title: "First Marker",
+                    center: { lat: 41.8781, lng: -87.6298 },
+                    zoom: 11,
                 });
             }
         </script>
@@ -260,9 +254,23 @@
                                 position: { lat: myLat, lng: myLng },
                                 map,
                             });
-
+                            let line1 = row["community_area_name"] ?? "N/A";
+                            let line2 =
+                                row["address"] ??
+                                "N/A" + " - " + row["sq_ft"] ??
+                                "N/A";
+                            let line3 = row["pin"] ?? "N/A";
+                            const contentString = `<h4>${line1}</h4>
+                                <p>${line2}</p>
+                                <p>${line3}</p>`;
                             let infowindow = new google.maps.InfoWindow({
-                                content: row["address"],
+                                content: contentString,
+                                // row["community_area_name"] ??
+                                // "N/A" + " - " + row["pin"] ??
+                                // "N/A" + " " + row["address"] ??
+                                // "N/A" + " - " + row["sq_ft"] ??
+                                // "N/A" + " " + row["pin"] ??
+                                // "N/A",
                             });
 
                             marker.addListener("click", () => {
