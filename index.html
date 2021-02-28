@@ -32,12 +32,18 @@
             crossorigin="anonymous"
         ></script>
         <script>
-            let map;
+            var map;
 
             function initMap() {
                 map = new google.maps.Map(document.getElementById("map"), {
                     center: { lat: 41.8696, lng: -87.6496 },
                     zoom: 12,
+                });
+
+                let marker = new google.maps.Marker({
+                    position: { lat: 41.8696, lng: -87.6496 },
+                    map,
+                    title: "First Marker",
                 });
             }
         </script>
@@ -249,17 +255,19 @@
                             //add google markers for the cards
                             let myLat = parseFloat(row["latitude"]);
                             let myLng = parseFloat(row["longitude"]);
-                            //let myLatlng = new google.maps.LatLng(myLat, myLng);
-                            let myMap = document.querySelector("#googleMap");
 
                             let marker = new google.maps.Marker({
                                 position: { lat: myLat, lng: myLng },
-                                map: myMap
+                                map,
                             });
 
-                            // let infowindow = new google.maps.InfoWindow({
-                            //     content: "Chicago",
-                            // });
+                            let infowindow = new google.maps.InfoWindow({
+                                content: row["address"],
+                            });
+
+                            marker.addListener("click", () => {
+                                infowindow.open(map, marker);
+                            });
                         }
                     });
 
